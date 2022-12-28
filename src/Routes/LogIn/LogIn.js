@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import auth from '../../firebase.init';
 import SocialLogIn from '../SocialLogIn/SocialLogIn';
 import {useNavigate,useLocation} from 'react-router-dom'
+import axios from 'axios';
 
 const LogIn = () => {
     const emailref =useRef()
@@ -19,18 +20,26 @@ const LogIn = () => {
         loading,
         error,
       ] = useSignInWithEmailAndPassword(auth);
+    
+      const from = location.state?.from?.pathname || "/home";
 
-    const handleSubmit=event=>{
+    const handleSubmit=async (event)=>{
         event.preventDefault()
         const email = emailref.current.value
         const pass = passref.current.value
-        signInWithEmailAndPassword(email,pass)
-        console.log(email,pass);
+        
+        await signInWithEmailAndPassword(email,pass)
+        const {data}=await axios.post('http://localhost:5000/login',{email})
+        console.log(data);
+        localStorage.setItem('tokenAccess',data.tokenAccess)
+        navigate(from, { replace: true });
+        // console.log(email,pass);
+        
     }
-    const from = location.state?.from?.pathname || "/";
+    
 
     if(user){
-        navigate(from, { replace: true });
+        
     }
 
     if(error){
